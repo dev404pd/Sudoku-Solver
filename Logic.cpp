@@ -1,51 +1,100 @@
-#include <bits/stdc++.h>
+#include<bits/stdc++.h>
 using namespace std;
 
-#define N 9  // Sudoku size
+#define N 9
 
-// Function to print the Sudoku board
-void printBoard(vector<vector<int>> &board) {
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < N; j++) {
-            cout << board[i][j] << " ";
+//function to print the board
+void printBoard(vector<vector<int>> & board)
+{
+    for(int i=0;i<N;i++)
+    {
+        for(int j=0;j<N;j++)
+        {
+            cout<<board[i][j]<<" ";
+
         }
-        cout << endl;
+        cout<<endl;
     }
 }
 
-// Check if placing num at board[row][col] is valid
-bool isSafe(vector<vector<int>> &board, int row, int col, int num) {
-    // Row check
-    for (int x = 0; x < N; x++)
-        if (board[row][x] == num) return false;
 
-    // Column check
-    for (int x = 0; x < N; x++)
-        if (board[x][col] == num) return false;
-
-    // 3x3 subgrid check
-    int startRow = row - row % 3, startCol = col - col % 3;
-    for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3; j++)
-            if (board[i + startRow][j + startCol] == num) return false;
-
+//issafe is a function that checks the cell is valid to place the num or not
+bool issafe(vector<vector<int>> &board, int row, int column, int num)
+{
+    //check if that row has same number
+    for(int i =0;i<N;i++)
+    {
+        if(board[row][N]==num)
+            return false;
+    }
+    //check if that column has same number
+    for(int i =0;i<N;i++)
+    {
+        if(board[N][column]==num)
+            return false;
+    }
+    //check the subgrid
+    int startrow = row - row%3, startcolumn = column - column%3;
+    for(int i=0;i<3;i++)
+    {
+        for(int j=0;j<3;j++)
+        {
+            if(board[i+startrow][j+startcolumn] == num)
+                return false;
+        }
+    }
     return true;
+
 }
 
-// Backtracking solver
-bool solveSudoku(vector<vector<int>> &board, int row = 0, int col = 0) {
-    if (row == N - 1 && col == N) return true;
-    if (col == N) { row++; col = 0; }
-    if (board[row][col] != 0) return solveSudoku(board, row, col + 1);
+//Function thatsolves and places the number at proper place
+//uses backtracking
+//here we traverse the board first left to right then top to bottom
+//here initializing row and column in call and not in function body
+// becoz it will always reset it even when we are recursively calling it
+bool solveSudoku(vector<vector<int>> &board,int row =0, int column =0)
+{
+    //We’re at the end of the last row (row index 8 is the bottom row).
+    //And we’ve just moved past the last column (col == 9).
+    //this is base case i.e we have traverse entire board
+    if(row==N-1 && column == N)
+        return true;
+    
+    //if column reached last point start traversing next row
+    if(column == N)
+    {
+        row++;
+        column = 0;
+    }
 
-    for (int num = 1; num <= 9; num++) {
-        if (isSafe(board, row, col, num)) {
-            board[row][col] = num;
-            if (solveSudoku(board, row, col + 1)) return true;
-            board[row][col] = 0; // backtrack
+    //if cell is non zero i.e already filled
+    //move to next coumn i.e column+1
+    if(board[row][column] != 0)
+    {
+        return solveSudoku(board,row,column+1);
+    }
+
+    //if it is zero then 
+    //1.check if it safe to place
+    //
+
+    for(int num=1;num<=N;num++)
+    {
+        if(issafe(board, row, column, num))
+        {
+            board[row][column] = num;
+            //recursion till all cells are resolved
+            if(solveSudoku(board, row, column+1))
+                return true;
+            //if it returns falls means it hit the dead end
+            //backtrack algo by one step make the row column zero zero
+
+            board[row][column] = 0; 
         }
+        
     }
     return false;
+
 }
 
 int main() {
